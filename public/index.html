@@ -1,0 +1,723 @@
+<title>Dashboard Comercial Omni</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: uma coluna de leitura de reunião (resumo de receita, KPIs, séries, tabelas),
+   paleta e gráficos do guia deck-2027-1: Manrope, azuis e cinzas, nada de vermelho ou verde. */
+:root{
+  --paper:#fcfcfc; --card:#ffffff; --sunken:#f1f2f4; --line:#e8eaef; --line-2:#d1d5dd;
+  --ink:#000919; --ink-2:#4a5160; --ink-3:#6b7280; --ink-4:#9ba1ae;
+  --accent:#2459ff; --accent-ink:#1b47d6; --accent-soft:#eef3ff; --accent-line:#dbe5ff;
+  --num:#0a1f5c; --base:#b3b8c2; --target:#4a5160;
+  --s1:#0a1f5c; --s1-on:#fcfcfc;   /* Venda Direta · Contratada · Bateu */
+  --s2:#2459ff; --s2-on:#fcfcfc;   /* Intermediador · Upsell */
+  --s3:#6bc2f2; --s3-on:#000919;   /* Distribuidor · Em contratação · Abaixo */
+  --s4:#b3b8c2; --s4-on:#000919;   /* Novos Parceiros */
+  --meta:#d1d5dd; --meta-on:#000919;
+  --font:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0a0f1f; --card:#10172c; --sunken:#151d36; --line:#212a45; --line-2:#2e3858;
+    --ink:#e9ecf4; --ink-2:#b0b7c7; --ink-3:#8b93a6; --ink-4:#6b7389;
+    --accent:#6d8fff; --accent-ink:#9cb3ff; --accent-soft:#16224a; --accent-line:#24346b;
+    --num:#cdd9ff; --base:#4a5370; --target:#b0b7c7;
+    --s1:#8aabff; --s1-on:#0a0f1f; --s2:#3f6bff; --s2-on:#fcfcfc; --s3:#6bc2f2; --s3-on:#0a0f1f;
+    --s4:#5b6480; --s4-on:#e9ecf4; --meta:#2e3858; --meta-on:#e9ecf4;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0a0f1f; --card:#10172c; --sunken:#151d36; --line:#212a45; --line-2:#2e3858;
+  --ink:#e9ecf4; --ink-2:#b0b7c7; --ink-3:#8b93a6; --ink-4:#6b7389;
+  --accent:#6d8fff; --accent-ink:#9cb3ff; --accent-soft:#16224a; --accent-line:#24346b;
+  --num:#cdd9ff; --base:#4a5370; --target:#b0b7c7;
+  --s1:#8aabff; --s1-on:#0a0f1f; --s2:#3f6bff; --s2-on:#fcfcfc; --s3:#6bc2f2; --s3-on:#0a0f1f;
+  --s4:#5b6480; --s4-on:#e9ecf4; --meta:#2e3858; --meta-on:#e9ecf4;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.45;margin:0;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto;padding-block:20px 56px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+button,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* topo */
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+h1{font-size:28px;font-weight:800;letter-spacing:-.5px;line-height:1.1;margin:4px 0 0;text-wrap:balance}
+.status{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-3);margin-top:8px}
+.status .dot{width:8px;height:8px;border-radius:50%;background:var(--ink-4)}
+.status.live .dot{background:var(--accent)}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.seg{display:inline-flex;background:var(--sunken);border:1px solid var(--line);border-radius:8px;padding:3px}
+.seg button{border:0;background:transparent;padding:6px 14px;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;color:var(--ink-2)}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 0 0 1px var(--line-2)}
+select{background:var(--card);border:1px solid var(--line-2);border-radius:8px;padding:7px 10px;font-size:13px;max-width:200px}
+
+nav.tabs{display:flex;gap:4px;margin:16px 0 24px;border-bottom:1px solid var(--line)}
+nav.tabs button{border:0;background:none;padding:10px 4px;margin-right:20px;font-size:15px;font-weight:700;color:var(--ink-3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--num)}
+
+section{margin-top:36px}
+section:first-child{margin-top:0}
+.sec-h{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 20px;margin-bottom:14px}
+h2{font-size:18px;font-weight:800;letter-spacing:-.2px;margin:0}
+h2 .unit{font-weight:400;color:var(--ink-3)}
+.sub{font-size:13px;color:var(--ink-3);margin-top:2px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;display:inline-block}
+
+/* faixa de receita */
+.rev{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.7fr) minmax(0,2.2fr);gap:0;border-top:2px solid var(--num);border-bottom:1px solid var(--line)}
+.rev > div{padding:16px 20px 18px;min-width:0}
+.rev > div + div{border-left:1px solid var(--line)}
+.lbl{font-size:13px;font-weight:700;color:var(--ink)}
+.big{font-size:36px;font-weight:400;letter-spacing:-1px;line-height:1.1;color:var(--num);margin-top:4px}
+.ctx{font-size:13px;color:var(--ink-2);margin-top:4px}
+.ctx b{font-weight:700;color:var(--ink)}
+.mtrio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.mtrio .when{font-size:12px;color:var(--ink-3);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.mtrio .when.cur{color:var(--accent-ink)}
+.mtrio .v{font-size:24px;letter-spacing:-.5px;color:var(--num);margin-top:2px}
+.mtrio .g{font-size:13px;color:var(--ink-2)}
+.brk{margin-top:8px;display:grid;gap:3px;font-size:12px;color:var(--ink-2)}
+.brk div{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding-top:3px}
+.brk i{width:8px;height:8px;display:inline-block;margin-right:6px}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px}
+.kpi{border-top:2px solid var(--num);padding-top:12px;min-width:0}
+.kpi .row{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.kpi .big{font-size:34px}
+.kpi .money{font-size:18px;color:var(--ink-2)}
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);background:var(--sunken);border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:1px}
+
+/* gráficos */
+.chart{width:100%;min-height:40px}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart text{font-family:var(--font)}
+.chart .hit{cursor:pointer}
+.chart .hit:hover rect.bg{fill:var(--sunken)}
+.hint{font-size:12px;color:var(--ink-3);margin-top:6px}
+
+/* tabelas e expansores */
+details{margin-top:14px;border-top:1px solid var(--line)}
+details > summary{cursor:pointer;list-style:none;padding:12px 0;font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px}
+details > summary::-webkit-details-marker{display:none}
+details > summary::before{content:"";width:7px;height:7px;border-right:2px solid var(--ink-2);border-bottom:2px solid var(--ink-2);transform:rotate(-45deg);transition:transform .15s}
+details[open] > summary::before{transform:rotate(45deg)}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:640px}
+th{text-align:left;font-weight:700;color:var(--ink);padding:10px 12px;border-bottom:2px solid var(--num);white-space:nowrap;background:var(--card)}
+td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.muted{color:var(--ink-3)}
+.chip{display:inline-block;font-size:12px;font-weight:600;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-ink);white-space:nowrap}
+.chip.ok{background:var(--sunken);color:var(--ink-2)}
+.empty{padding:18px;color:var(--ink-3);font-size:13px}
+.inner-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.inner-tabs button{border:1px solid var(--line-2);background:var(--card);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer}
+.inner-tabs button[aria-pressed="true"]{background:var(--num);border-color:var(--num);color:var(--paper)}
+.minis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-top:16px}
+.minis .kpi .big{font-size:26px}
+
+.note{margin-top:28px;font-size:12px;color:var(--ink-3);border-top:1px solid var(--line);padding-top:12px;max-width:80ch}
+.err{border:1px solid var(--line-2);background:var(--sunken);border-radius:8px;padding:16px;margin-top:24px}
+.skel{color:var(--ink-3);padding:40px 0}
+
+@media (max-width: 900px){
+  .rev{grid-template-columns:1fr 1fr}
+  .rev > div:nth-child(3){grid-column:1 / -1;border-left:0;border-top:1px solid var(--line)}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width: 520px){
+  .rev{grid-template-columns:1fr}
+  .rev > div + div{border-left:0;border-top:1px solid var(--line)}
+  .mtrio{grid-template-columns:1fr;gap:14px}
+  .mtrio > div{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px;align-items:baseline}
+  .mtrio .when{grid-column:1 / -1}
+  .mtrio .brk{grid-column:1 / -1}
+  .mtrio .v{font-size:22px}
+  .big{font-size:30px}
+  .kpis{gap:18px}
+  .kpi .big{font-size:28px}
+  .minis{grid-template-columns:1fr 1fr}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Omni Saúde · Comercial</div>
+      <h1>Dashboard Comercial</h1>
+      <div class="status" id="status"><span class="dot"></span><span id="status-txt">Carregando dados…</span></div>
+    </div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Janela de tempo" id="seg-periodo">
+        <button type="button" id="p-mes" data-p="mes" aria-pressed="true">Mês</button>
+        <button type="button" id="p-tri" data-p="tri" aria-pressed="false">Tri</button>
+        <button type="button" id="p-ano" data-p="ano" aria-pressed="false">Ano</button>
+      </div>
+      <select id="f-dono" aria-label="Filtrar por dono do negócio"><option value="">Todos os donos</option></select>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button type="button" role="tab" id="t-geral" data-tab="geral" aria-selected="true">Geral</button>
+    <button type="button" role="tab" id="t-receita" data-tab="receita" aria-selected="false">Receita</button>
+  </nav>
+
+  <main id="view-geral">
+    <div class="skel" id="skel">Carregando HubSpot e Book de Receita…</div>
+  </main>
+  <main id="view-receita" hidden></main>
+</div>
+
+<script id="snapshot" type="application/json">null</script>
+<script>
+(function(){
+'use strict';
+
+/* ======================================================================
+   REGRAS DE NEGÓCIO (herdadas do app Streamlit, ajustadas ao HubSpot atual)
+   ====================================================================== */
+const RH='905377457', DIST='909751331', PARC='905381684';
+const STAGES={};
+STAGES[RH]=[['1370199980','Coleta de informações'],['1370199981','Proposta'],['1370199982','Negociação'],['1370199983','Contratação'],['1370199984','Ganho'],['1370199985','Perdido']];
+STAGES[DIST]=[['1380918674','Novo Lead'],['1380918675','Proposta'],['1380918677','Negociação'],['1380918676','Aditivo'],['1380918678','Contratação'],['1380918679','Ganho'],['1380918680','Perdido']];
+STAGES[PARC]=[['1370127123','Coleta de informações'],['1370127124','Proposta'],['1422397087','Negociação'],['1370127125','Contratação'],['1370127126','Ganho'],['1370127127','Perdido']];
+// Gatilho de "negócio aberto": em RH e Captação é a primeira etapa do funil
+// (antiga Apresentação, mesmo ID). Em Distribuidor é Proposta.
+const GATILHO={}; GATILHO[RH]='1370199980'; GATILHO[DIST]='1380918675'; GATILHO[PARC]='1370127123';
+const NEGOC={}; NEGOC[RH]='1370199982'; NEGOC[DIST]='1380918677'; NEGOC[PARC]='1422397087';
+const CASCATA={}; CASCATA[RH]=['1370199980','1370199981','1370199982','1370199983']; CASCATA[PARC]=['1370127123']; CASCATA[DIST]=[];
+// Migração Pipedrive: a carga carimbou a entrada em etapa na semana 33/2026.
+const MIG_INI='2026-08-10', MIG_FIM='2026-08-16';
+
+const MODS=[
+  {k:'VD',  nome:'Venda Direta',    cor:'--s1', pipe:RH},
+  {k:'INT', nome:'Intermediador',   cor:'--s2', pipe:RH},
+  {k:'DIST',nome:'Distribuidor',    cor:'--s3', pipe:DIST},
+];
+const PARC_MOD={k:'PARC',nome:'Novos Parceiros',cor:'--s4',pipe:PARC};
+const MOD_NOME={VD:'Venda Direta',INT:'Intermediador',DIST:'Distribuidor',PARC:'Novos Parceiros'};
+const RECEITA=new Set(['VD','INT','DIST']);
+
+// Metas de abertura (Matteo, 23/out/2026). A divisão 15/15 da Indireta é premissa.
+function metaMes(y,m,k){
+  const f2 = y>2026 || (y===2026 && m>=11);
+  const t = f2 ? {VD:30,INT:15,DIST:15,PARC:50} : {VD:20,INT:10,DIST:10,PARC:null};
+  if(k==='TODOS') return t.VD+t.INT+t.DIST;
+  return t[k];
+}
+const LEAD_RH=new Set(['lead-pipeline-id','952155157','952022031']);
+const LEAD_PARC=new Set(['953930105','952044667']);
+const NOMES_TESTE=['omni saude teste'];
+
+/* ======================================================================
+   UTILITÁRIOS
+   ====================================================================== */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const semAcento=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const MES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+// Data em São Paulo (UTC-3) como "AAAA-MM-DD".
+const sp=iso=>{ if(!iso) return null; const t=new Date(iso).getTime(); if(isNaN(t)) return null; return new Date(t-3*3600e3).toISOString().slice(0,10); };
+const ym=s=>s.slice(0,7);
+const lblMes=(y,m)=>MES[m-1]+'/'+String(y).slice(2);
+const parseYM=s=>({y:+s.slice(0,4),m:+s.slice(5,7)});
+const addM=(y,m,n)=>{const t=y*12+(m-1)+n; return {y:Math.floor(t/12),m:t%12+1};};
+const ymStr=(y,m)=>y+'-'+String(m).padStart(2,'0');
+function isoWeek(ds){ const [y,m,d]=ds.split('-').map(Number); const t=new Date(Date.UTC(y,m-1,d)); const day=t.getUTCDay()||7; t.setUTCDate(t.getUTCDate()+4-day); const y0=new Date(Date.UTC(t.getUTCFullYear(),0,1)); return {y:t.getUTCFullYear(),w:Math.ceil(((t-y0)/864e5+1)/7)}; }
+function mondayOf(ds){ const [y,m,d]=ds.split('-').map(Number); const t=new Date(Date.UTC(y,m-1,d)); const day=t.getUTCDay()||7; t.setUTCDate(t.getUTCDate()-day+1); return t.toISOString().slice(0,10); }
+const addDays=(ds,n)=>{const [y,m,d]=ds.split('-').map(Number); const t=new Date(Date.UTC(y,m-1,d+n)); return t.toISOString().slice(0,10);};
+const dm=ds=>ds?ds.slice(8,10)+'/'+ds.slice(5,7):'';
+const dmy=ds=>ds?ds.slice(8,10)+'/'+ds.slice(5,7)+'/'+ds.slice(0,4):'—';
+
+const fInt=v=>v==null||isNaN(v)?'—':Math.round(v).toLocaleString('pt-BR');
+const fPct=(v,d=0)=>v==null||!isFinite(v)?'—':(v*100).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d})+'%';
+const fSig=(v,d=1)=>v==null||!isFinite(v)?'—':(v>0?'+':v<0?'−':'')+Math.abs(v*100).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d})+'%';
+function fCurto(v){ if(v==null||isNaN(v)) return '—'; const a=Math.abs(v);
+  if(a>=1e6) return (v/1e6).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:2})+'M';
+  if(a>=1e3) return (v/1e3).toLocaleString('pt-BR',{maximumFractionDigits:a>=1e5?0:1})+'K';
+  return Math.round(v).toLocaleString('pt-BR'); }
+const fR=v=>v==null||isNaN(v)?'—':'R$ '+fCurto(v);
+const fRCheio=v=>v==null||isNaN(v)?'—':'R$ '+Math.round(v).toLocaleString('pt-BR');
+const fX=v=>v==null||!isFinite(v)?'—':v.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'x';
+
+/* ======================================================================
+   ESTADO
+   ====================================================================== */
+const S={periodo:'mes',tab:'geral',dono:'',bucketSel:null,mensalMod:'TODOS',funilMod:'VD',dados:null,receita:null,live:false,hoje:null};
+try{ const p=localStorage.getItem('omni-dash-periodo'); if(['mes','tri','ano'].includes(p)) S.periodo=p; }catch(e){}
+
+/* ======================================================================
+   PREPARO DOS NEGÓCIOS
+   ====================================================================== */
+function prep(d){
+  const st=STAGES[d.pipeline]||[];
+  const ix=sid=>st.findIndex(x=>x[0]===sid);
+  const o=Object.assign({},d);
+  o.idx=ix(d.stage);
+  o.fase=o.idx>=0?st[o.idx][1]:'Desconhecida';
+  o.criadoD=sp(d.criado); o.fechadoD=sp(d.fechado);
+  o.aberto_em_andamento=!d.ganho&&!d.perdido;
+  if(d.pipeline===DIST) o.mod='DIST';
+  else if(d.pipeline===PARC) o.mod='PARC';
+  else if(d.pipeline===RH) o.mod=d.tipo==='venda_direta'?'VD':d.tipo==='venda_indireta_intermediador'?'INT':d.tipo==='venda_indireta_distribuidor'?'DIST':null;
+  else o.mod=null;
+  o.canonico = o.mod && ((o.mod==='DIST'&&d.pipeline===DIST)||((o.mod==='VD'||o.mod==='INT')&&d.pipeline===RH)||(o.mod==='PARC'));
+
+  // ABERTURA: data de entrada no gatilho ou etapa posterior (cascata); sem data,
+  // a criação, quando a etapa prova que o negócio passou pelo gatilho.
+  const gIdx=ix(GATILHO[d.pipeline]);
+  let ab=null;
+  for(const sid of (CASCATA[d.pipeline]||[])){ if(d.datas&&d.datas[sid]){ ab=sp(d.datas[sid]); break; } }
+  let aberto=!!ab;
+  if(!aberto){
+    if(d.ganho) aberto=true;
+    else if(!d.perdido && o.idx>=gIdx && gIdx>=0) aberto=true;
+    else if(d.perdido && gIdx===0) aberto=true; // primeira etapa já é o gatilho
+    if(aberto) ab=o.criadoD;
+  }
+  if(ab && ab>=MIG_INI && ab<=MIG_FIM && o.criadoD && o.criadoD<MIG_INI) ab=o.criadoD;
+  o.aberto=aberto; o.abertoD=aberto?ab:null;
+
+  // ALCANCE no funil (índice da etapa mais avançada comprovada).
+  let alc = d.perdido ? (gIdx>=0&&aberto?gIdx:-1) : (d.ganho ? ix(st.find(x=>x[1]==='Ganho')[0]) : o.idx);
+  Object.keys(d.datas||{}).forEach(sid=>{ const i=ix(sid); if(i>alc) alc=i; });
+  o.alcance=alc;
+  // Etapa avançada: depois de Negociação sempre; em Negociação só com o aceite verbal marcado.
+  const nIdx=ix(NEGOC[d.pipeline]);
+  o.emNegociacao=o.aberto_em_andamento && o.idx===nIdx;
+  o.avancado=o.aberto_em_andamento && (o.idx>nIdx || (o.idx===nIdx && d.negAv));
+  o.parceiroTxt=d.parceiro || (o.mod==='VD'?'Direto':'—');
+  o.teste=NOMES_TESTE.some(t=>semAcento(d.nome+' '+d.empresa).includes(t));
+  return o;
+}
+
+/* ======================================================================
+   PERÍODOS
+   ====================================================================== */
+function janela(p,hoje){
+  const {y,m}=parseYM(hoje);
+  if(p==='mes') return {ini:ymStr(y,m)+'-01', fim:hoje, rot:lblMes(y,m)};
+  if(p==='tri'){ const q=Math.floor((m-1)/3); const m0=q*3+1; return {ini:ymStr(y,m0)+'-01', fim:hoje, rot:(q+1)+'T'+String(y).slice(2)}; }
+  return {ini:y+'-01-01', fim:hoje, rot:String(y)};
+}
+const dentro=(ds,j)=>ds && ds>=j.ini && ds<=j.fim;
+
+/* ======================================================================
+   GRÁFICOS (SVG desenhado na largura real do contêiner)
+   ====================================================================== */
+const SVGNS='http://www.w3.org/2000/svg';
+function txt(x,y,s,attrs){ return `<text x="${x}" y="${y}" ${attrs||''}>${esc(s)}</text>`; }
+
+// Barras empilhadas no tempo (guia: base marinho, depois azul, céu, cinza; total acima).
+function chartEmpilhado(el, buckets, series, opts){
+  const W=Math.max(300, el.clientWidth||800), H=opts.h||300;
+  const padL=8,padR=8,top=30,bot=34, base=H-bot;
+  const n=buckets.length, passo=(W-padL-padR)/n, bw=Math.min(64, passo*0.62);
+  const totais=buckets.map(b=>series.reduce((s,k)=>s+(b.v[k.k]||0),0));
+  const max=Math.max(1,...totais);
+  const esc_=v=>v*(base-top)/max;
+  let g='';
+  buckets.forEach((b,i)=>{
+    const cx=padL+passo*i+passo/2, x=cx-bw/2;
+    const sel = opts.sel!=null && opts.sel===i;
+    g+=`<g class="hit" data-i="${i}" role="button" tabindex="0" aria-label="${esc(b.label)}: ${totais[i]} negócios"><rect class="bg" x="${padL+passo*i+2}" y="${top-24}" width="${passo-4}" height="${base-top+24}" rx="4" fill="${sel?css('--accent-soft'):'transparent'}"/>`;
+    let y=base;
+    series.forEach(s=>{
+      const v=b.v[s.k]||0; if(!v) return; const h=esc_(v); y-=h;
+      g+=`<rect x="${x}" y="${y}" width="${bw}" height="${h}" style="fill:var(${s.cor})"/>`;
+      if(h>=17) g+=txt(cx,y+h/2+4.5,fInt(v),`text-anchor="middle" font-size="12" style="fill:var(${s.cor}-on)"`);
+    });
+    g+=txt(cx,y-8,fInt(totais[i]),`text-anchor="middle" font-size="14" style="fill:var(--ink)"`);
+    g+=txt(cx,base+18,b.label,`text-anchor="middle" font-size="12" style="fill:${sel?'var(--accent-ink)':'var(--ink-2)'}" ${sel?'font-weight="700"':''}`);
+    if(b.sub) g+=txt(cx,base+31,b.sub,`text-anchor="middle" font-size="10" style="fill:var(--ink-4)"`);
+    g+='</g>';
+  });
+  g+=`<line x1="${padL}" y1="${base}" x2="${W-padR}" y2="${base}" style="stroke:var(--base)" stroke-width="1.5"/>`;
+  el.innerHTML=`<svg xmlns="${SVGNS}" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(opts.aria||'')}">${g}</svg>`;
+  if(opts.onPick) el.querySelectorAll('.hit').forEach(h=>{
+    const go=()=>opts.onPick(+h.dataset.i);
+    h.addEventListener('click',go);
+    h.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(); } });
+  });
+}
+
+// Meta x realizado, barras lado a lado por mês. Realizado: marinho quando bate, céu quando fica abaixo.
+function chartMeta(el, meses, opts){
+  const W=Math.max(300, el.clientWidth||800), H=opts.h||280;
+  const padL=8,padR=8,top=28,bot=36, base=H-bot;
+  const n=meses.length, passo=(W-padL-padR)/n, bw=Math.min(34,passo*0.32), gap=4;
+  const max=Math.max(1,...meses.map(m=>Math.max(m.real,m.meta||0)));
+  const h=v=>v*(base-top)/max;
+  let g='';
+  meses.forEach((m,i)=>{
+    const cx=padL+passo*i+passo/2;
+    const xm=cx-bw-gap/2, xr=cx+gap/2;
+    if(m.meta!=null){
+      const hm=h(m.meta);
+      g+=`<rect x="${xm}" y="${base-hm}" width="${bw}" height="${hm}" style="fill:var(--meta)"/>`;
+      g+=txt(xm+bw/2,base-hm-6,fInt(m.meta),`text-anchor="middle" font-size="12" style="fill:var(--ink-3)"`);
+    }
+    const bateu = m.meta!=null && m.real>=m.meta;
+    const cor = m.meta==null ? '--s4' : (bateu?'--s1':'--s3');
+    const xR = m.meta==null ? cx-bw/2 : xr;
+    const hr=h(m.real);
+    g+=`<rect x="${xR}" y="${base-hr}" width="${bw}" height="${hr}" style="fill:var(${cor})"/>`;
+    g+=txt(xR+bw/2,base-hr-6,fInt(m.real),`text-anchor="middle" font-size="13" style="fill:var(--ink)"`);
+    g+=txt(cx,base+18,passo<48?m.label.slice(0,3):m.label,`text-anchor="middle" font-size="${passo<48?10:12}" style="fill:var(--ink-2)"`);
+    if(m.parcial) g+=txt(cx,base+31,'parcial',`text-anchor="middle" font-size="10" style="fill:var(--ink-4)"`);
+  });
+  g+=`<line x1="${padL}" y1="${base}" x2="${W-padR}" y2="${base}" style="stroke:var(--base)" stroke-width="1.5"/>`;
+  el.innerHTML=`<svg xmlns="${SVGNS}" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(opts.aria||'')}">${g}</svg>`;
+}
+
+// Funil em cascata: barras horizontais, base de comparação sempre a primeira etapa.
+function chartFunil(el, linhas){
+  const W=Math.max(300, el.clientWidth||800);
+  const lblW=Math.min(170, W*0.32), valW=96, rowH=40, top=6;
+  const H=top+linhas.length*rowH;
+  const max=Math.max(1,...linhas.map(l=>l.n));
+  const area=W-lblW-valW-8;
+  let g='';
+  linhas.forEach((l,i)=>{
+    const y=top+i*rowH; const w=Math.max(l.n?2:0, l.n/max*area);
+    const x=lblW+(area-w)/2;
+    const cor = l.ganho ? '--s1' : '--s2';
+    g+=txt(0,y+rowH/2+4,lblW<150&&l.label.length>14?l.label.replace('Coleta de informações','Coleta de info.'):l.label,`font-size="13" style="fill:var(--ink)"`);
+    g+=`<rect x="${x}" y="${y+5}" width="${w}" height="${rowH-10}" style="fill:var(${cor})"/>`;
+    if(w>=36) g+=txt(lblW+area/2,y+rowH/2+4.5,fInt(l.n),`text-anchor="middle" font-size="13" style="fill:var(${cor}-on)"`);
+    else g+=txt(x+w+6,y+rowH/2+4.5,fInt(l.n),`font-size="13" style="fill:var(--ink)"`);
+    g+=txt(W,y+rowH/2+4,(i===0?'base':fPct(l.pct))+(l.valor?' · '+fR(l.valor):''),`text-anchor="end" font-size="12" style="fill:var(--ink-2)"`);
+  });
+  el.innerHTML=`<svg xmlns="${SVGNS}" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Funil de passagem por etapa">${g}</svg>`;
+}
+
+// MRR mensal empilhado (Contratada, Upsell, Em contratação) com a meta tracejada.
+function chartMRR(el, meses, meta, curIdx){
+  const W=Math.max(300, el.clientWidth||900), H=320;
+  const padL=8,padR=8,top=34,bot=34, base=H-bot;
+  const n=meses.length, passo=(W-padL-padR)/n, bw=Math.min(46,passo*0.66);
+  const max=Math.max(meta||0,...meses.map(m=>m.total))*1.06;
+  const h=v=>v*(base-top)/max;
+  let g='';
+  if(curIdx<n-1){ const xp=padL+passo*(curIdx+1); g+=`<rect x="${xp}" y="${top-26}" width="${W-padR-xp}" height="${base-top+26}" style="fill:var(--sunken)"/>`;
+    g+=txt(W-padR-6,top-12,'projeção do Book',`text-anchor="end" font-size="11" style="fill:var(--ink-3)"`); }
+  const segs=[['contratada','--s1'],['upsell','--s2'],['emContratacao','--s3']];
+  meses.forEach((m,i)=>{
+    const cx=padL+passo*i+passo/2, x=cx-bw/2; let y=base;
+    segs.forEach(([k,c])=>{ const v=m[k]||0; if(!v) return; const hh=h(v); y-=hh; g+=`<rect x="${x}" y="${y}" width="${bw}" height="${hh}" style="fill:var(${c})"/>`; });
+    const mostra = n<=14 || i%2===curIdx%2 || i===curIdx;
+    if(mostra) g+=txt(cx,y-7,fCurto(m.total),`text-anchor="middle" font-size="${passo<44?10:12}" style="fill:var(--ink)" ${i===curIdx?'font-weight="700"':''}`);
+    if(mostra) g+=txt(cx,base+18,m.label,`text-anchor="middle" font-size="11" style="fill:${i===curIdx?'var(--accent-ink)':'var(--ink-2)'}" ${i===curIdx?'font-weight="700"':''}`);
+  });
+  if(meta){ const ym_=base-h(meta);
+    g+=`<line x1="${padL}" y1="${ym_}" x2="${W-padR}" y2="${ym_}" style="stroke:var(--target)" stroke-width="1.5" stroke-dasharray="6 6"/>`;
+    g+=txt(padL+4,ym_-6,'Meta 2026: R$ '+fCurto(meta),`font-size="12" style="fill:var(--ink-2)"`); }
+  g+=`<line x1="${padL}" y1="${base}" x2="${W-padR}" y2="${base}" style="stroke:var(--base)" stroke-width="1.5"/>`;
+  el.innerHTML=`<svg xmlns="${SVGNS}" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="MRR mensal com meta de 2026">${g}</svg>`;
+}
+
+/* ======================================================================
+   RECEITA (Book)
+   ====================================================================== */
+function receitaSerie(R){
+  const meses = R.meses || R.mrr.map((_,i)=>{ const {y,m}=parseYM(R.inicio); const t=addM(y,m,i); return ymStr(t.y,t.m); });
+  return meses.map((s,i)=>({ym:s, mrr:R.mrr[i], contratada:R.contratada?R.contratada[i]:R.mrr[i], upsell:R.upsell?R.upsell[i]:0,
+    emContratacao:R.emContratacao?R.emContratacao[i]:0, pctMeta:R.pctMeta?R.pctMeta[i]:null}));
+}
+function trioReceita(R,periodo,hoje){
+  const ser=receitaSerie(R); const at=k=>ser.find(x=>x.ym===k);
+  const {y,m}=parseYM(hoje);
+  let refs, rot, nomeG;
+  if(periodo==='mes'){ refs=[-1,0,1].map(n=>addM(y,m,n)); rot=refs.map(r=>lblMes(r.y,r.m)); nomeG='MoM'; }
+  else if(periodo==='tri'){ const qEnd=Math.floor((m-1)/3)*3+3; refs=[-3,0,3].map(n=>addM(y,qEnd,n));
+    rot=refs.map(r=>Math.ceil(r.m/3)+'T'+String(r.y).slice(2)); nomeG='QoQ'; }
+  else { refs=[-1,0,1].map(n=>({y:y+n,m:12})); rot=refs.map(r=>String(r.y)); nomeG='YoY'; }
+  const step = periodo==='mes'?1:periodo==='tri'?3:12;
+  return refs.map((r,i)=>{ const cur=at(ymStr(r.y,r.m)); const p=addM(r.y,r.m,-step); const prev=at(ymStr(p.y,p.m));
+    return {rot:rot[i], ref:r, ponto:cur, g:cur&&prev&&prev.mrr?cur.mrr/prev.mrr-1:null, nomeG, atual:i===1}; });
+}
+
+function htmlFaixaReceita(R,periodo,hoje,compacto){
+  if(!R) return `<div class="err">Book de Receita indisponível. ${esc(S.erroReceita||'')}</div>`;
+  const ser=receitaSerie(R); const cur=ser.find(x=>x.ym===ym(hoje));
+  const trio=trioReceita(R,periodo,hoje);
+  const ultimo=trio[2];
+  const det = ultimo.ponto ? `<div class="brk">
+      <div><span><i style="background:var(--s1)"></i>Contratada</span><span class="tnum">${fR(ultimo.ponto.contratada)}</span></div>
+      <div><span><i style="background:var(--s2)"></i>Em upsell</span><span class="tnum">${fR(ultimo.ponto.upsell)}</span></div>
+      <div><span><i style="background:var(--s3)"></i>Em contratação</span><span class="tnum">${fR(ultimo.ponto.emContratacao)}</span></div></div>` : '';
+  const pm = cur && cur.pctMeta!=null ? cur.pctMeta : (cur&&R.meta2026?cur.mrr/R.meta2026:null);
+  return `<div class="rev">
+    <div><div class="lbl">MRR · ${esc(lblMes(+hoje.slice(0,4),+hoje.slice(5,7)))}</div>
+      <div class="big tnum">${fR(cur&&cur.mrr)}</div>
+      <div class="ctx"><b>${fPct(pm)}</b> da meta 2026 (${fR(R.meta2026)})</div>
+      <div class="ctx">ARR <b>${fR(cur&&cur.mrr*12)}</b></div></div>
+    <div><div class="lbl">CAGR YTD 2026</div>
+      <div class="big tnum">${fPct(R.cagrYtd,2)}</div>
+      <div class="ctx">crescimento médio ao mês no ano</div></div>
+    <div><div class="mtrio">${trio.map((t,i)=>`<div>
+        <div class="when ${t.atual?'cur':''}">${['Anterior','Atual','Próximo'][i]} · ${esc(t.rot)}</div>
+        <div class="v tnum">${fR(t.ponto&&t.ponto.mrr)}</div>
+        <div class="g tnum">${fSig(t.g)} ${t.nomeG}</div>
+        ${i===2?det:''}</div>`).join('')}</div></div>
+  </div>`;
+}
+
+/* ======================================================================
+   ABA GERAL
+   ====================================================================== */
+function bucketsAbertos(periodo,hoje){
+  const {y,m}=parseYM(hoje);
+  if(periodo==='mes'){ // 12 semanas ISO até a atual
+    const seg=mondayOf(hoje); const out=[];
+    for(let i=11;i>=0;i--){ const ini=addDays(seg,-7*i), fim=addDays(ini,6); const w=isoWeek(ini);
+      out.push({ini,fim,label:'S'+String(w.w).padStart(2,'0'),sub:dm(ini)}); }
+    return out;
+  }
+  const n = periodo==='tri' ? 6 : m;
+  const out=[]; for(let i=n-1;i>=0;i--){ const t=addM(y,m,-i); const ini=ymStr(t.y,t.m)+'-01'; const f=addM(t.y,t.m,1);
+    out.push({ini,fim:addDays(ymStr(f.y,f.m)+'-01',-1),label:lblMes(t.y,t.m)}); }
+  return out;
+}
+
+function tabelaDeals(lista,opts){
+  if(!lista.length) return `<div class="empty">${esc(opts.vazio||'Nenhum negócio.')}</div>`;
+  const colData=opts.colData||'criadoD', rotData=opts.rotData||'Criado em';
+  return `<div class="tbl"><table><thead><tr><th>Empresa</th><th>Modalidade</th><th>Parceiro</th><th>Fase</th><th class="r">Valor</th><th class="r">${esc(rotData)}</th>${opts.dono?'<th>Dono</th>':''}</tr></thead><tbody>
+  ${lista.map(d=>`<tr><td>${esc(d.empresa||d.nome)}</td><td>${esc(MOD_NOME[d.mod]||'—')}</td><td class="${d.parceiro?'':'muted'}">${esc(d.parceiroTxt)}</td>
+    <td><span class="chip ${d.ganho||d.perdido?'ok':''}">${esc(d.fase)}</span></td><td class="r">${d.amount!=null?fRCheio(d.amount):'—'}</td><td class="r">${dmy(d[colData])}</td>${opts.dono?`<td class="muted">${esc(d.dono||'—')}</td>`:''}</tr>`).join('')}
+  </tbody></table></div>`;
+}
+
+function renderGeral(){
+  const D=S.deals, hoje=S.hoje, J=janela(S.periodo,hoje);
+  const base=D.filter(d=>!d.teste && (!S.dono || d.dono===S.dono));
+  const receita=base.filter(d=>RECEITA.has(d.mod));
+
+  // KPIs
+  const leadsRH=S.dados.leadsDia.filter(([p,ds])=>LEAD_RH.has(p)&&dentro(ds,J)).reduce((s,x)=>s+x[2],0);
+  const leadsPa=S.dados.leadsDia.filter(([p,ds])=>LEAD_PARC.has(p)&&dentro(ds,J)).reduce((s,x)=>s+x[2],0);
+  const abertos=receita.filter(d=>d.aberto&&dentro(d.abertoD,J));
+  const ganhos=receita.filter(d=>d.ganho&&dentro(d.fechadoD,J));
+  const perdidos=receita.filter(d=>d.perdido&&dentro(d.fechadoD,J));
+  const soma=l=>l.reduce((s,d)=>s+(d.amount||0),0);
+  const pipe=receita.filter(d=>d.aberto_em_andamento&&d.aberto);
+  // Pipe coverage (Matteo, 17/11/2026): pipe em aberto ÷ média mensal de R$ ganho nos 6 meses fechados anteriores.
+  const {y,m}=parseYM(hoje); const ini6=addM(y,m,-6);
+  const j6={ini:ymStr(ini6.y,ini6.m)+'-01', fim:addDays(ymStr(y,m)+'-01',-1)};
+  const ganhoMedio=soma(receita.filter(d=>d.ganho&&dentro(d.fechadoD,j6)))/6;
+  const coverage=ganhoMedio?soma(pipe)/ganhoMedio:null;
+
+  // Série de abertos
+  const bk=bucketsAbertos(S.periodo,hoje);
+  const series=[...MODS,PARC_MOD];
+  const buckets=bk.map(b=>{ const v={}; series.forEach(s=>v[s.k]=0);
+    base.forEach(d=>{ if(d.aberto&&d.mod&&d.abertoD>=b.ini&&d.abertoD<=b.fim) v[d.mod]=(v[d.mod]||0)+1; });
+    return Object.assign({},b,{v}); });
+  if(S.bucketSel==null||S.bucketSel>=buckets.length) S.bucketSel=buckets.length-1;
+  const bSel=buckets[S.bucketSel];
+  const noBucket=base.filter(d=>d.aberto&&d.mod&&d.abertoD>=bSel.ini&&d.abertoD<=bSel.fim).sort((a,b)=>a.abertoD<b.abertoD?1:-1);
+
+  // Etapa avançada (estoque de hoje, sem recorte de data)
+  const ordem=(a,b)=>(b.idx-a.idx)||((b.amount||0)-(a.amount||0));
+  const avancados=receita.filter(d=>d.avancado).sort(ordem);
+  const demais=receita.filter(d=>d.emNegociacao&&!d.avancado).sort(ordem);
+
+  $('#view-geral').innerHTML=`
+  <section>
+    <div class="sec-h"><div><h2>Receita <span class="unit">· Book de Receita</span></h2></div>
+      <div class="sub">Comparação ${S.periodo==='mes'?'mês a mês':S.periodo==='tri'?'trimestre a trimestre (MRR no fim do tri)':'ano a ano (MRR de dezembro)'}</div></div>
+    ${htmlFaixaReceita(S.receita,S.periodo,hoje)}
+  </section>
+
+  <section>
+    <div class="sec-h"><div><h2>Funil comercial <span class="unit">· ${esc(J.rot)}, até ${dm(hoje)}</span></h2>
+      <div class="sub">Venda Direta, Intermediador e Distribuidor. Leads pela criação, abertos pela entrada no gatilho, ganhos e perdidos pela data de fechamento.</div></div></div>
+    <div class="kpis">
+      <div class="kpi"><div class="lbl">Leads</div><div class="row"><div class="big tnum">${fInt(leadsRH)}</div></div>
+        <div class="ctx">+ ${fInt(leadsPa)} de parceiros · objeto Lead, desde 22/10/26</div></div>
+      <div class="kpi"><div class="lbl">Abertos</div><div class="row"><div class="big tnum">${fInt(abertos.length)}</div><div class="money tnum">${fR(soma(abertos))}</div></div>
+        <div class="ctx">Pipe coverage <b>${fX(coverage)}</b><span class="tag" title="Pipe em aberto (${fR(soma(pipe))}) dividido pela média mensal ganha nos últimos 6 meses fechados (${fR(ganhoMedio)}).">6 meses</span></div></div>
+      <div class="kpi"><div class="lbl">Ganhos</div><div class="row"><div class="big tnum">${fInt(ganhos.length)}</div><div class="money tnum">${fR(soma(ganhos))}</div></div>
+        <div class="ctx">${ganhos.length+perdidos.length?fPct(ganhos.length/(ganhos.length+perdidos.length))+' dos fechados no período':'nenhum fechamento no período'}</div></div>
+      <div class="kpi"><div class="lbl">Perdidos</div><div class="row"><div class="big tnum">${fInt(perdidos.length)}</div><div class="money tnum">${fR(soma(perdidos))}</div></div>
+        <div class="ctx">pela data de fechamento</div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><div><h2>Negócios abertos <span class="unit">· ${S.periodo==='mes'?'por semana':'por mês'}</span></h2>
+      <div class="sub">Clique numa barra para ver os negócios dela.</div></div>
+      <div class="legend">${series.map(s=>`<span><i style="background:var(${s.cor})"></i>${esc(s.nome)}</span>`).join('')}</div></div>
+    <div class="chart" id="ch-abertos"></div>
+    <details id="det-periodo"><summary>Negócios no período · ${esc(bSel.label)}${bSel.sub?' ('+esc(dm(bSel.ini))+' a '+esc(dm(bSel.fim))+')':''} · ${noBucket.length}</summary>
+      ${tabelaDeals(noBucket,{colData:'abertoD',rotData:'Aberto em',vazio:'Nenhum negócio aberto nesse intervalo.',dono:true})}</details>
+  </section>
+
+  <section>
+    <div class="sec-h"><div><h2>Negócios em etapa avançada <span class="unit">· ${avancados.length}</span></h2>
+      <div class="sub">Negociação com aceite verbal marcado, ou etapa posterior. Foto de hoje, sem recorte de período.</div></div></div>
+    ${tabelaDeals(avancados,{vazio:'Nenhum negócio em etapa avançada.'})}
+    <details id="det-demais"><summary>Demais em negociação · ${demais.length}</summary>
+      ${tabelaDeals(demais,{vazio:'Nenhum outro negócio em Negociação.',dono:true})}</details>
+  </section>
+
+  <section>
+    <div class="sec-h"><div><h2>Negócios mensal <span class="unit">· abertos x meta, ${y}</span></h2></div>
+      <div class="legend"><span><i style="background:var(--meta)"></i>Meta</span><span><i style="background:var(--s1)"></i>Bateu</span><span><i style="background:var(--s3)"></i>Abaixo</span></div></div>
+    <div class="inner-tabs" id="tabs-mensal">${[['TODOS','Todos'],['VD','Venda Direta'],['INT','Intermediador'],['DIST','Distribuidor'],['PARC','Novos Parceiros']].map(([k,n])=>`<button type="button" id="mm-${k}" data-k="${k}" aria-pressed="${S.mensalMod===k}">${n}</button>`).join('')}</div>
+    <div class="chart" id="ch-mensal"></div>
+    <div class="minis" id="minis-mensal"></div>
+  </section>
+
+  <section>
+    <div class="sec-h"><div><h2>Funil de passagem <span class="unit">· abertos em ${esc(J.rot)}</span></h2>
+      <div class="sub">Quantos negócios abertos no período chegaram a cada etapa. Percentual sobre a primeira etapa.</div></div></div>
+    <div class="inner-tabs" id="tabs-funil">${MODS.map(s=>`<button type="button" id="fm-${s.k}" data-k="${s.k}" aria-pressed="${S.funilMod===s.k}">${s.nome}</button>`).join('')}</div>
+    <div class="chart" id="ch-funil"></div>
+    <div class="hint" id="funil-nota"></div>
+  </section>
+
+  <p class="note">Regras: negócio aberto é o que chegou à etapa gatilho (Coleta de informações em Novos Negócios RH, Proposta em Expansão Distribuidor), mesmo que depois tenha sido ganho ou perdido. Modalidade vem do pipeline e do Tipo de Venda. Datas carimbadas pela migração do Pipedrive (semana 33/2026) caem para a data de criação. Pipelines Upsell, Inclusão de Vidas e BIDs ficam fora desta versão.</p>`;
+
+  chartEmpilhado($('#ch-abertos'),buckets,series,{h:290,sel:S.bucketSel,aria:'Negócios abertos por '+(S.periodo==='mes'?'semana':'mês'),
+    onPick:i=>{ S.bucketSel=i; const open=true; renderGeral(); const d=$('#det-periodo'); if(d&&open) d.open=true; }});
+
+  // Mensal x meta
+  const mesesAno=[]; for(let i=1;i<=m;i++) mesesAno.push({y,m:i});
+  const k=S.mensalMod;
+  const mm=mesesAno.map(t=>{ const pre=ymStr(t.y,t.m);
+    const real=base.filter(d=>d.aberto&&d.abertoD&&ym(d.abertoD)===pre&&(k==='TODOS'?RECEITA.has(d.mod):d.mod===k)).length;
+    return {label:lblMes(t.y,t.m),real,meta:metaMes(t.y,t.m,k),parcial:t.m===m}; });
+  chartMeta($('#ch-mensal'),mm,{h:270,aria:'Negócios abertos por mês contra a meta'});
+  const comMeta=mm.filter(x=>x.meta!=null);
+  const tr=comMeta.reduce((s,x)=>s+x.real,0), tm=comMeta.reduce((s,x)=>s+x.meta,0);
+  const fechados=comMeta.filter(x=>!x.parcial);
+  $('#minis-mensal').innerHTML=`
+    <div class="kpi"><div class="lbl">Realizado no ano</div><div class="big tnum">${fInt(mm.reduce((s,x)=>s+x.real,0))}</div><div class="ctx">meta ${comMeta.length?fInt(tm):'sem meta definida'}</div></div>
+    <div class="kpi"><div class="lbl">Diferença</div><div class="big tnum">${comMeta.length?(tr-tm>=0?'+':'−')+fInt(Math.abs(tr-tm)):'—'}</div><div class="ctx">nos meses com meta</div></div>
+    <div class="kpi"><div class="lbl">Meses na meta</div><div class="big tnum">${fechados.length?fechados.filter(x=>x.real>=x.meta).length+'/'+fechados.length:'—'}</div><div class="ctx">meses fechados</div></div>`;
+  document.querySelectorAll('#tabs-mensal button').forEach(b=>b.onclick=()=>{ S.mensalMod=b.dataset.k; renderGeral(); });
+
+  // Funil
+  const mod=MODS.find(x=>x.k===S.funilMod);
+  const coorte=base.filter(d=>d.mod===mod.k&&d.aberto&&dentro(d.abertoD,J));
+  const noPipe=coorte.filter(d=>d.pipeline===mod.pipe);
+  const st=STAGES[mod.pipe].filter(x=>x[1]!=='Perdido');
+  const g0=st.findIndex(x=>x[0]===GATILHO[mod.pipe]);
+  const etapas=st.slice(g0);
+  const linhas=etapas.map((e,ii)=>{ const i=g0+ii; const chegaram=noPipe.filter(d=>d.alcance>=i);
+    return {label:e[1],n:chegaram.length,valor:soma(chegaram),ganho:e[1]==='Ganho'}; });
+  linhas.forEach(l=>l.pct=linhas[0].n?l.n/linhas[0].n:null);
+  if(noPipe.length) chartFunil($('#ch-funil'),linhas); else $('#ch-funil').innerHTML='<div class="empty">Nenhum negócio desta modalidade aberto no período. Troque para Tri ou Ano.</div>';
+  const fora=coorte.length-noPipe.length;
+  const perdSemHist=noPipe.filter(d=>d.perdido&&Object.keys(d.datas||{}).length===0).length;
+  $('#funil-nota').textContent=[fora?`${fora} negócio(s) desta modalidade estão em outro pipeline e ficam fora do funil.`:'',
+    perdSemHist?`${perdSemHist} perdido(s) sem data de etapa contam só na primeira etapa.`:''].filter(Boolean).join(' ');
+  document.querySelectorAll('#tabs-funil button').forEach(b=>b.onclick=()=>{ S.funilMod=b.dataset.k; renderGeral(); });
+}
+
+/* ======================================================================
+   ABA RECEITA
+   ====================================================================== */
+function renderReceita(){
+  const R=S.receita, hoje=S.hoje;
+  if(!R){ $('#view-receita').innerHTML=`<div class="err">Book de Receita indisponível. ${esc(S.erroReceita||'')}</div>`; return; }
+  const ser=receitaSerie(R);
+  const {y}=parseYM(hoje);
+  const janelaM=ser.filter(s=>s.ym>=(y)+'-01'&&s.ym<=(y+1)+'-12');
+  const curIdx=janelaM.findIndex(s=>s.ym===ym(hoje));
+  const cur=ser.find(s=>s.ym===ym(hoje));
+  const dez=ser.find(s=>s.ym===y+'-12');
+  $('#view-receita').innerHTML=`
+  <section>
+    <div class="sec-h"><div><h2>Big numbers <span class="unit">· ${esc(R.fonte||'Book de Receita')}</span></h2></div></div>
+    ${htmlFaixaReceita(R,S.periodo,hoje)}
+  </section>
+  <section>
+    <div class="sec-h"><div><h2>MRR por mês <span class="unit">· R$, ${y} e ${y+1}</span></h2>
+      <div class="sub">Meses depois de ${esc(lblMes(y,+hoje.slice(5,7)))} são a projeção do Book.</div></div>
+      <div class="legend"><span><i style="background:var(--s1)"></i>Contratada</span><span><i style="background:var(--s2)"></i>Em upsell</span><span><i style="background:var(--s3)"></i>Em contratação</span></div></div>
+    <div class="chart" id="ch-mrr"></div>
+    <div class="minis">
+      <div class="kpi"><div class="lbl">Dez/${String(y).slice(2)} projetado</div><div class="big tnum">${fR(dez&&dez.mrr)}</div><div class="ctx">${dez&&R.meta2026?fPct(dez.mrr/R.meta2026)+' da meta cheia':''}</div></div>
+      <div class="kpi"><div class="lbl">Piso da meta (85%)</div><div class="big tnum">${fR(R.piso2026)}</div><div class="ctx">${cur&&R.piso2026?fPct(cur.mrr/R.piso2026)+' atingido hoje':''}</div></div>
+      <div class="kpi"><div class="lbl">Em pipeline de receita</div><div class="big tnum">${fR(dez?(dez.upsell+dez.emContratacao):null)}</div><div class="ctx">upsell + em contratação em dez/${String(y).slice(2)}</div></div>
+    </div>
+  </section>`;
+  chartMRR($('#ch-mrr'),janelaM.map(s=>({label:lblMes(+s.ym.slice(0,4),+s.ym.slice(5,7)),total:s.mrr||0,contratada:s.contratada||0,upsell:s.upsell||0,emContratacao:s.emContratacao||0})),R.meta2026,curIdx);
+}
+
+/* ======================================================================
+   MONTAGEM
+   ====================================================================== */
+function render(){
+  if(!S.deals) return;
+  $('#view-geral').hidden=S.tab!=='geral'; $('#view-receita').hidden=S.tab!=='receita';
+  if(S.tab==='geral') renderGeral(); else renderReceita();
+}
+
+function wire(){
+  document.querySelectorAll('#seg-periodo button').forEach(b=>b.addEventListener('click',()=>{
+    S.periodo=b.dataset.p; S.bucketSel=null;
+    document.querySelectorAll('#seg-periodo button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+    try{ localStorage.setItem('omni-dash-periodo',S.periodo); }catch(e){}
+    render(); }));
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.addEventListener('click',()=>{
+    S.tab=b.dataset.tab; document.querySelectorAll('nav.tabs button').forEach(x=>x.setAttribute('aria-selected',String(x===b)));
+    try{ history.replaceState(null,'','#'+S.tab); }catch(e){ location.hash=S.tab; }
+    render(); }));
+  $('#f-dono').addEventListener('change',e=>{ S.dono=e.target.value; S.bucketSel=null; render(); });
+  let t; window.addEventListener('resize',()=>{ clearTimeout(t); t=setTimeout(render,150); });
+  window.addEventListener('hashchange',()=>{ const h=location.hash.slice(1); if(h==='geral'||h==='receita'){ S.tab=h; document.querySelectorAll('nav.tabs button').forEach(x=>x.setAttribute('aria-selected',String(x.dataset.tab===h))); render(); } });
+  const h=location.hash.slice(1); if(h==='receita'){ S.tab='receita'; document.querySelectorAll('nav.tabs button').forEach(x=>x.setAttribute('aria-selected',String(x.dataset.tab==='receita'))); }
+  document.querySelectorAll('#seg-periodo button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.p===S.periodo)));
+}
+
+async function getJSON(u){ const r=await fetch(u,{credentials:'same-origin'}); const j=await r.json().catch(()=>({erro:'Resposta inválida de '+u})); if(!r.ok) throw new Error(j.erro||('HTTP '+r.status)); return j; }
+
+async function boot(){
+  wire();
+  let snap=null; try{ snap=JSON.parse(document.getElementById('snapshot').textContent); }catch(e){}
+  try{
+    if(snap){ S.dados=snap.dados; S.receita=snap.receita; S.live=false; }
+    else{
+      const [d,r]=await Promise.allSettled([getJSON('/api/dados'),getJSON('/api/receita')]);
+      if(d.status!=='fulfilled') throw d.reason;
+      S.dados=d.value; S.live=true;
+      if(r.status==='fulfilled') S.receita=r.value; else S.erroReceita=String(r.reason&&r.reason.message||r.reason);
+    }
+  }catch(e){
+    $('#view-geral').innerHTML=`<div class="err"><b>Não consegui carregar o HubSpot.</b><br>${esc(e.message||e)}</div>`;
+    $('#status-txt').textContent='Sem dados'; return;
+  }
+  S.hoje=sp(S.dados.atualizadoEm)||sp(new Date().toISOString());
+  S.deals=S.dados.deals.map(prep);
+  const donos=[...new Set(S.deals.filter(d=>RECEITA.has(d.mod)||d.mod==='PARC').map(d=>d.dono).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  $('#f-dono').insertAdjacentHTML('beforeend',donos.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join(''));
+  const quando=new Date(S.dados.atualizadoEm);
+  const hh=quando.toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  $('#status').classList.toggle('live',S.live);
+  $('#status-txt').textContent=S.live?`Ao vivo · HubSpot e Book lidos em ${hh}`:`Foto dos dados de ${hh} · na Vercel passa a ser ao vivo`;
+  render();
+}
+boot();
+})();
+</script>

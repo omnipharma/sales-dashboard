@@ -1,0 +1,10 @@
+{
+  "name": "dashboard-comercial-omni",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dashboard Comercial Omni: aba Geral (HubSpot) e Receita (Book Receita).",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "preview": "node scripts/build-preview.js"
+  }
+}
